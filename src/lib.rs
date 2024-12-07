@@ -1,4 +1,4 @@
-use std::fs;
+use std::{error::Error, fs};
 
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
     let mut result = Vec::new();
@@ -27,7 +27,29 @@ Pick three.";
     }
 }
 
+pub struct Config {
+    pub query: String,
+    pub path: String,
+}
 
-// pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
-//     let contents = fs::read_to_string(config.file)
-// }
+impl Config {
+    pub fn build(args: &[String]) -> Result<Config, &'static str> {
+        if args.len() < 3 {
+            return Err("not enough args");
+        }
+
+        let query = args[1].clone();
+        let path = args[2].clone();
+    
+        Ok(Config { query, path })
+    }
+}
+
+pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    let raw = fs::read_to_string(config.path)?;
+    for line in search(&config.query, &raw) {
+        println!("{line}");
+    }
+
+    Ok(())
+}
